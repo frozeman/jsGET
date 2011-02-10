@@ -20,7 +20,7 @@
 *
 * ### Methods
 * - load():                                 loads the current hash variables into the vars.current property as JSON object.
-* - clear():                                clears the hash part of the URL, (which is not completely possible) thats why it sets "#none".
+* - clear():                                clears the hash part of the URL.
 * - get(get):                               (string) try to get a hash variable with the given name.
 * - set(set):                               (string,number,object) sets the given parameters to the hash variales. If its a string it should have the following format: "key=value".
 * - remove(remove):                         (string,array) the variable name(s) which should be removed from the hash variables
@@ -36,20 +36,26 @@
 */
 
 var jsGET = {
-  vars: {old:{},current:{},changed:{}},
+  vars: {
+    old:{},
+    current:{},
+    changed:{}
+  },
   load: function() {
     var hashVars = window.location.hash.split('#');
-    if(typeof hashVars[1] != 'undefined') {
+    if(typeof hashVars[1] != 'undefined' && hashVars[1]) {
       hashVars = hashVars[1].split('&');
       for(var i = 0; i < hashVars.length; i++) {
           var hashVar = hashVars[i].split('=');
           this.vars.current[hashVar[0]] = hashVar[1];
       }
-    }
+    } else
+      this.vars.current = {};
     return this.vars.current;
   },
   clear: function() {
-    window.location.hash = '#none';
+    //window.location = window.location.href.replace( /#.*/, "");
+    window.location.hash = "";
     return false;
   },
   get: function(get) {
@@ -167,9 +173,10 @@ var jsGET = {
             console.log('-----');
             console.log(self.vars.old);
             console.log(self.vars.changed);
-            */    
+            */
             // call the given listener function
             if(typeof listener == 'function') listener.apply(bind,[self.vars]);
+
           } else
             setChangedVars();
           /*

@@ -38,7 +38,7 @@ See the demo.html for examples.
 
 ### Methods
 - load():                                 loads the current hash variables into an JSON object.
-- clear():                                clears the hash part of the URL, which is not completely possible, thats why it sets "#none".
+- clear():                                clears the hash part of the URL.
 - get(get):                               (string) try to get a hash variable with the given name.
 - set(set):                               (string,number,object) sets the given parameters to the hash variales. If its a string it should have the following format: "key=value".
 - remove(remove):                         (string,array) the variable name(s) which should be removed from the hash variables
