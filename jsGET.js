@@ -33,6 +33,8 @@
 * Everytime you call set(), remove() or clear() a new hash string will be set,
 * that means you also create a new history step in the browser history!
 *
+* These are 'special' characters to jsGET and will therefor be encoded when they are part of a key or value:
+*   # & =
 */
 
 var jsGET = {
@@ -47,12 +49,24 @@ var jsGET = {
       hashVars = hashVars[1].split('&');
       for(var i = 0; i < hashVars.length; i++) {
           var hashVar = hashVars[i].split('=');
-          this.vars.current[hashVar[0]] = hashVar[1];
+          this.vars.current[this.decode(hashVar[0])] = (typeof hashVar[1] != 'undefined' ? this.decode(hashVar[1]) : '');
       }
     } else {
       this.vars.current = {};
 	}
     return this.vars.current;
+  },
+  // encode special characters in the input string; use encodeURIComponent() to encode as that one is fast and ensures proper Unicode handling as well: bonus!
+  encode: function(s) {
+	s = encodeURIComponent(s);
+	// BUT! browsers take things like '%26' in the URL anywhere and translate it to '&' before we get our hands on the fragment part, so we need to prevent the browsers from doing this:
+	s = s.replace(/%/g, '$'); // we can do this safely as encodeURIComponent() will have encoded any '$' in the original string!
+	return s;
+  },
+  decode: function(s) {
+	s = s.replace(/\$/g, '%');
+	s = decodeURIComponent(s);
+	return s;
   },
   clear: function() {
     window.location.hash = "#_";
@@ -70,9 +84,10 @@ var jsGET = {
     if(typeof set != 'object') {
       setSplit = set.split('=');
       set = {};
-      set[setSplit[0]] = (typeof setSplit[1] != 'undefined')
-        ? setSplit[1]
-        : '';
+	  // be aware that the _value_ of the key, value pair can have an embedded '=' (or more) itself:
+	  var key = setSplit.shift();
+	  var value = setSplit.join('=');
+      set[key] = value;
     }
 
     // var
@@ -83,14 +98,14 @@ var jsGET = {
     for(var key in this.vars.current) {
       if(this.vars.current.hasOwnProperty(key)) {
         if(set.hasOwnProperty(key)) {
-          hashString += sep+key+'='+set[key];
+          hashString += sep+this.encode(key)+'='+this.encode(set[key]);
           delete set[key];
         } else if(typeof this.vars.current[key] != 'undefined') {
 		  // given the loop, the condition should be always TRUE
-          hashString += sep+key+'='+this.vars.current[key];
+          hashString += sep+this.encode(key)+'='+this.encode(this.vars.current[key]);
         } else {
-		  console.log('jsGET: *** SHOULD NEVER GET HERE! *** @ 101');
-          hashString += sep+key;
+		  console.log('jsGET: *** SHOULD NEVER GET HERE! *** @ 101 ' + key);
+          hashString += sep+this.encode(key);
 		}
         sep = '&';
       }
@@ -107,7 +122,7 @@ var jsGET = {
         if (this.get(key) !== null)
 		  console.log('jsGET: *** SHOULD NEVER GET HERE! *** @ 118');
 
-        hashString += sep+key+'='+set[key];
+        hashString += sep+this.encode(key)+'='+this.encode(set[key]);
         sep = '&';
       }
     }
@@ -138,10 +153,10 @@ var jsGET = {
     for(var key in this.vars.current) {
       if(this.vars.current.hasOwnProperty(key)) {
         if(typeof this.vars.current[key] != 'undefined') {
-          hashString += sep+key+'='+this.vars.current[key];
+          hashString += sep+this.encode(key)+'='+this.encode(this.vars.current[key]);
         } else {
-		  console.log('jsGET: *** SHOULD NEVER GET HERE! *** @ 153');
-          hashString += sep+key;
+		  console.log('jsGET: *** SHOULD NEVER GET HERE! *** @ 153 ' + key);
+          hashString += sep+this.encode(key);
 		}
         sep = '&';
       }

@@ -50,3 +50,6 @@ When callAlways is FALSE, it only calls when the browser history buttons are pre
 ### ATTENTION!
 Everytime you call set(), remove() or clear() a new hash string will be set,
 that means you also create a new history step in the browser history!
+
+These are 'special' characters to jsGET and will therefor be encoded when they are part of a key or value:
+  # & =
