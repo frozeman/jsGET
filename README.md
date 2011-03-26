@@ -20,32 +20,32 @@ Fabian Vogelsteller <http://frozeman.de>
 
 ### DESCRIPTION
 jsGET is a http GET-Variables clone for javascript, using the hash part of the URL (index.html#...).
-You can set and get variables, and run a listener to hash changes, e.g. when the the history back button get pressed.
-This allows you to create a usable history navigation in your ajay application. It should work with all a-grade browsers.
+You can set and get variables, and run a listener to hash changes, e.g. when the the history back button gets pressed.
+This allows you to create a usable history navigation in your ajax application. It should work with all A-grade browsers.
 
 ### VERSION
 0.1
 
 ### INSTALLATION
-Just include the jsGET.js in your website/webapplication and use the jsGET object with it's methods to set, get, remove history hash variables.
+Just include the jsGET.js in your website/webapplication and use the jsGET object with its methods to set, get, remove history hash variables.
 See the demo.html for examples.
 
 ### Properties
 - vars:         (object) the hash variables object loaded by get(), set(), remove(), or clear() or load().
 - vars.current: (object) the current variables.
-- vars.old:     (object) the old variables, before they where changed with get(), set(), remove(), or clear(),load() or the browser history back button.
+- vars.old:     (object) the old variables, before they where changed with set(), remove(), clear(), load() or the browser history back button.
 - vars.changed: (object) the variabels which have changed since the last call of get(), set(), remove(), or clear(), load() or the browser history back button.
 
 ### Methods
-- load():                                 loads the current hash variables into an JSON object.
-- clear():                                clears the hash part of the URL. (beacuse its not completely possible, it sets it to "#_")
+- load():                                 loads the current hash variables into the vars.current property as JSON object.
+- clear():                                clears the hash part of the URL. (because it's not completely possible, it sets it to "#_")
 - get(get):                               (string) try to get a hash variable with the given name.
-- set(set):                               (string,number,object) sets the given parameters to the hash variales. If its a string it should have the following format: "key=value".
+- set(set):                               (string,number,object) sets the given parameters to the hash variales. If it's a string it should have the following format: "key=value".
 - remove(remove):                         (string,array) the variable name(s) which should be removed from the hash variables
-- addListener(listener,callAlways,bind):  (listener: function, callAlways: boolean, bind: object instance) creates a listener which calls the given function, when a hash change appears. The called function will get the vars property (vars.current,vars.old,vars.changed) and the "bind" as "this", when specified.
-The return of the addListener() method is a setInterval ID and must be passed to the removeListener() method, to stop the listening.
+- addListener(listener,callAlways,bind):  (listener: function, callAlways: boolean, bind: object instance) creates a listener which calls the given function, when a hash change appears. The called function will get the vars property (vars.current,vars.old,vars.changed) and use the "bind" parameter as "this", when specified.
+The return of the addListener() method is a setInterval ID and must be passed to the removeListener() method to stop the listening.
 When callAlways is FALSE, it only calls when the browser history buttons are pressed and not when get(), set(), remove() or clear() is called.
-- removeListener(listenerID):             (the setInterval Id get from a addListener() method) removes a listener set with the addListener() method.
+- removeListener(listenerID):             (the setInterval Id received from a addListener() method) removes a listener set with the addListener() method.
 
 ### ATTENTION!
 Everytime you call set(), remove() or clear() a new hash string will be set,
