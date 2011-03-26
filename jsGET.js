@@ -86,8 +86,10 @@ var jsGET = {
           hashString += sep+key+'='+set[key];
           delete set[key];
         } else if(typeof this.vars.current[key] != 'undefined') {
+		  // given the loop, the condition should be always TRUE
           hashString += sep+key+'='+this.vars.current[key];
         } else {
+		  console.log('jsGET: *** SHOULD NEVER GET HERE! *** @ 101');
           hashString += sep+key;
 		}
         sep = '&';
@@ -96,8 +98,15 @@ var jsGET = {
 
     // add new vars
     for(var key in set) {
-      if(set.hasOwnProperty(key) &&
-         (typeof this.vars.current[key] == 'undefined' || this.get(key) != set[key])) {
+      if(set.hasOwnProperty(key)) {
+        // (typeof this.vars.current[key] == 'undefined' || this.get(key) != set[key])) {
+		// ^^^ first part should be always TRUE, second part merely filters out the set key=null items,
+		//     as get(key) would always produce NULL here...
+        if (typeof this.vars.current[key] != 'undefined')
+		  console.log('jsGET: *** SHOULD NEVER GET HERE! *** @ 116');
+        if (this.get(key) !== null)
+		  console.log('jsGET: *** SHOULD NEVER GET HERE! *** @ 118');
+
         hashString += sep+key+'='+set[key];
         sep = '&';
       }
@@ -109,8 +118,8 @@ var jsGET = {
     this.load();
 
     if(typeof remove != 'object') {
-      removes = new Array();
-      removes[0] = remove;
+      removes = [remove]; // new Array(); is discouraged (Crockford / jsLint)
+      //removes[0] = remove;
     } else {
       removes = remove;
 	}
@@ -131,6 +140,7 @@ var jsGET = {
         if(typeof this.vars.current[key] != 'undefined') {
           hashString += sep+key+'='+this.vars.current[key];
         } else {
+		  console.log('jsGET: *** SHOULD NEVER GET HERE! *** @ 153');
           hashString += sep+key;
 		}
         sep = '&';
