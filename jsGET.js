@@ -155,7 +155,7 @@ var jsGET = {
     var lastHash = '';
     self.vars.old = new self.vars.current.constructor();
 	for(var key in self.vars.current) {
-		self.vars.old[key] = self.vars.current[key];;
+		self.vars.old[key] = self.vars.current[key];
 	}
 
     function compareVars(obj1,obj2) {
