@@ -22,9 +22,9 @@
 * - load():                                 loads the current hash variables into the vars.current property as JSON object.
 * - clear():                                clears the hash part of the URL. (because it's not completely possible, it sets it to "#_")
 * - get(get):                               (string) try to get a hash variable with the given name.
-* - set(set):                               (string,number,object) sets the given parameters to the hash variales. If it's a string it should have the following format: "key=value".
+* - set(set):                               (string,object) sets the given parameters to the hash variables. If it's a string it should have the following format: "key=value".
 * - remove(remove):                         (string,array) the variable name(s) which should be removed from the hash variables
-* - addListener(listener,callAlways,bind):  (listener: function, callAlways: boolean, bind: object instance) creates a listener which calls the given function, when a hash change appears. The called function will get the vars property (vars.current,vars.old,vars.changed) and use the "bind" parameter as "this", when specified.
+* - addListener(listener,callAlways,bind):  (listener: function, callAlways: boolean, bind: object instance) creates a listener which calls the given function when a hash change occurs. The called function will get the vars property (vars.current,vars.old,vars.changed) and use the "bind" parameter as "this", when specified.
 *                                           The return of the addListener() method is a setInterval ID and must be passed to the removeListener() method to stop the listening.
 *                                           When callAlways is FALSE, it only calls when the browser history buttons are pressed and not when get(), set(), remove() or clear() is called.
 * - removeListener(listenerID):             (the setInterval Id received from a addListener() method) removes a listener set with the addListener() method.
@@ -41,19 +41,19 @@ var jsGET = {
   vars: {
     old:{},
     current:{},
-    changed:{}
+    changed:{},
+	change_count: 0
   },
   load: function() {
     var hashVars = window.location.hash.split('#');
+    this.vars.current = {};
     if(typeof hashVars[1] != 'undefined' && hashVars[1] && hashVars[1] != '_') {
       hashVars = hashVars[1].split('&');
       for(var i = 0; i < hashVars.length; i++) {
           var hashVar = hashVars[i].split('=');
           this.vars.current[this.decode(hashVar[0])] = (typeof hashVar[1] != 'undefined' ? this.decode(hashVar[1]) : '');
       }
-    } else {
-      this.vars.current = {};
-	}
+    }
     return this.vars.current;
   },
   // encode special characters in the input string; use encodeURIComponent() to encode as that one is fast and ensures proper Unicode handling as well: bonus!
@@ -75,10 +75,10 @@ var jsGET = {
   },
   get: function(get) {
     this.load();
-    return (this.vars.current[get]) ? this.vars.current[get] : null;
+    return (this.vars.current[get] ? this.vars.current[get] : null);
   },
   set: function(set) {
-    //console.log('savedHistory');
+    //if (typeof console !== 'undefined' && console.log) console.log('savedHistory');
     this.load();
 
     if(typeof set != 'object') {
@@ -104,7 +104,7 @@ var jsGET = {
 		  // given the loop, the condition should be always TRUE
           hashString += sep+this.encode(key)+'='+this.encode(this.vars.current[key]);
         } else {
-		  console.log('jsGET: *** SHOULD NEVER GET HERE! *** @ 101 ' + key);
+		  if (typeof console !== 'undefined' && console.log) console.log('jsGET: *** SHOULD NEVER GET HERE! *** @ 101 ' + key);
           hashString += sep+this.encode(key);
 		}
         sep = '&';
@@ -118,9 +118,9 @@ var jsGET = {
 		// ^^^ first part should be always TRUE, second part merely filters out the set key=null items,
 		//     as get(key) would always produce NULL here...
         if (typeof this.vars.current[key] != 'undefined')
-		  console.log('jsGET: *** SHOULD NEVER GET HERE! *** @ 116');
+		  if (typeof console !== 'undefined' && console.log) console.log('jsGET: *** SHOULD NEVER GET HERE! *** @ 116');
         if (this.get(key) !== null)
-		  console.log('jsGET: *** SHOULD NEVER GET HERE! *** @ 118');
+		  if (typeof console !== 'undefined' && console.log) console.log('jsGET: *** SHOULD NEVER GET HERE! *** @ 118');
 
         hashString += sep+this.encode(key)+'='+this.encode(set[key]);
         sep = '&';
@@ -155,7 +155,7 @@ var jsGET = {
         if(typeof this.vars.current[key] != 'undefined') {
           hashString += sep+this.encode(key)+'='+this.encode(this.vars.current[key]);
         } else {
-		  console.log('jsGET: *** SHOULD NEVER GET HERE! *** @ 153 ' + key);
+		  if (typeof console !== 'undefined' && console.log) console.log('jsGET: *** SHOULD NEVER GET HERE! *** @ 153 ' + key);
           hashString += sep+this.encode(key);
 		}
         sep = '&';
@@ -173,14 +173,8 @@ var jsGET = {
 		self.vars.old[key] = self.vars.current[key];
 	}
 
-    function compareVars(obj1,obj2) {
-      for(var key in obj1) {
-		if(obj1[key] !== obj2[key]) return false;
-	  }
-      return true;
-    }
-
     function setChangedVars() {
+	  var change_count;
       var oldVars = new self.vars.old.constructor();
 	  for(var key in self.vars.old) {
 		oldVars[key] = self.vars.old[key];
@@ -190,18 +184,24 @@ var jsGET = {
 		self.vars.changed[key] = self.vars.current[key];
 	  }
       // check for changed vars
+	  change_count = 0;
       for(var key in self.vars.changed) {
         if(self.vars.changed.hasOwnProperty(key) && typeof oldVars[key] != 'undefined' && oldVars[key] == self.vars.changed[key]) {
           delete self.vars.changed[key];
           delete oldVars[key];
         }
+	    else {
+		  change_count++;
+		}
 	  }
       // merge the rest of self.vars.old with the changedVars
       for(var key in oldVars) {
         if(oldVars.hasOwnProperty(key) && !(key in self.vars.changed)) {
-			self.vars.changed[key] = oldVars[key];
+		  self.vars.changed[key] = oldVars[key];
+		  change_count++;
 		}
       }
+	  return self.vars.change_count = change_count;
     }
 
     this.pollHash = function() {
@@ -209,27 +209,25 @@ var jsGET = {
           // var
           lastHash = window.location.hash;
 
-          if(callAlways || compareVars(self.vars.current,self.vars.old)) {
+          self.load();
+          var change_count = setChangedVars();
+          if(callAlways || change_count > 0) {
             // var
-            self.load();
-            setChangedVars();
             /*
-            console.log('-----');
-            console.log(self.vars.old);
-            console.log(self.vars.changed);
+            if (typeof console !== 'undefined' && console.log) console.log('-----');
+            if (typeof console !== 'undefined' && console.log) console.log(self.vars.old);
+            if (typeof console !== 'undefined' && console.log) console.log(self.vars.changed);
             */
             // call the given listener function
             if(typeof listener == 'function') {
 				listener.apply(bind,[self.vars]);
 			}
-          } else {
-            setChangedVars();
-		  }
+          }
           /*
-          console.log('-----');
-          console.log(self.vars.current);
-          console.log(self.vars.old);
-          console.log(self.vars.changed);
+          if (typeof console !== 'undefined' && console.log) console.log('-----');
+          if (typeof console !== 'undefined' && console.log) console.log(self.vars.current);
+          if (typeof console !== 'undefined' && console.log) console.log(self.vars.old);
+          if (typeof console !== 'undefined' && console.log) console.log(self.vars.changed);
           */
           self.vars.old = new self.vars.current.constructor();
 		  for(var key in self.vars.current) {
