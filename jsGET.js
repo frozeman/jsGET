@@ -76,114 +76,114 @@ var jsGET = {
 				}
 			}
 			this.vars.last_hash_loaded = new_hash;
-	}
-    return this.vars.current;
-  },
-  // encode special characters in the input string; use encodeURIComponent() to encode as that one is fast and ensures proper Unicode handling as well: bonus!
-  encode: function(s) {
-	s = encodeURIComponent(s);
-	// BUT! browsers take things like '%26' in the URL anywhere and translate it to '&' before we get our hands on the fragment part, so we need to prevent the browsers from doing this:
-	s = s.replace(/%/g, '$'); // we can do this safely as encodeURIComponent() will have encoded any '$' in the original string!
-	return s;
-  },
-  decode: function(s) {
-	s = s.replace(/\$/g, '%');
-	s = decodeURIComponent(s);
-	return s;
-  },
-  clear: function() {
+		}
+		return this.vars.current;
+	},
+	// encode special characters in the input string; use encodeURIComponent() to encode as that one is fast and ensures proper Unicode handling as well: bonus!
+	encode: function(s) {
+		s = encodeURIComponent(s);
+		// BUT! browsers take things like '%26' in the URL anywhere and translate it to '&' before we get our hands on the fragment part, so we need to prevent the browsers from doing this:
+		s = s.replace(/%/g, '$'); // we can do this safely as encodeURIComponent() will have encoded any '$' in the original string!
+		return s;
+	},
+	decode: function(s) {
+		s = s.replace(/\$/g, '%');
+		s = decodeURIComponent(s);
+		return s;
+	},
+	clear: function() {
 		this.vars.last_hash_saved = window.location.hash = "#_";
-    //window.location.href = window.location.href.replace( /#.*$/, "");
-    return false;
-  },
+		//window.location.href = window.location.href.replace( /#.*$/, "");
+		return false;
+	},
 	get: function(key) {
-    this.load();
+		this.load();
 		return (this.vars.current.hasOwnProperty(key) ? this.vars.current[key] : null);
-  },
-  set: function(set) {
+	},
+	set: function(set) {
 		var key;
 
-    //if (typeof console !== 'undefined' && console.log) console.log('savedHistory');
-    this.load();
+		//if (typeof console !== 'undefined' && console.log) console.log('savedHistory');
+		this.load();
 
 		if (typeof set !== 'object') {
 			var setSplit = set.split('=');
-      set = {};
-	  // be aware that the _value_ of the key, value pair can have an embedded '=' (or more) itself:
+			set = {};
+			// be aware that the _value_ of the key, value pair can have an embedded '=' (or more) itself:
 			key = setSplit.shift();
-	  var value = setSplit.join('=');
-      set[key] = value;
-    }
+			var value = setSplit.join('=');
+			set[key] = value;
+		}
 		else {
 			// do not damage the set passed in as a parameter
 			set = Object.clone(set);
 		}
 
-    // var
-    var hashString = '';
-    var sep = '#';
+		// var
+		var hashString = '';
+		var sep = '#';
 
-    // check for change in existing vars
+		// check for change in existing vars
 		for(key in this.vars.current) {
-      if(this.vars.current.hasOwnProperty(key)) {
-        if(set.hasOwnProperty(key)) {
-          hashString += sep+this.encode(key)+'='+this.encode(set[key]);
-          delete set[key];
+			if (this.vars.current.hasOwnProperty(key)) {
+				if (set.hasOwnProperty(key)) {
+					hashString += sep+this.encode(key)+'='+this.encode(set[key]);
+					delete set[key];
 				}
 				else {
-          hashString += sep+this.encode(key)+'='+this.encode(this.vars.current[key]);
+					hashString += sep+this.encode(key)+'='+this.encode(this.vars.current[key]);
+				}
+				sep = '&';
+			}
 		}
-        sep = '&';
-      }
-    }
 
-    // add new vars
+		// add new vars
 		for(key in set) {
-      if(set.hasOwnProperty(key)) {
-
-        hashString += sep+this.encode(key)+'='+this.encode(set[key]);
-        sep = '&';
-      }
-    }
+			if (set.hasOwnProperty(key)) {
+				hashString += sep+this.encode(key)+'='+this.encode(set[key]);
+				sep = '&';
+			}
+		}
 		this.vars.last_hash_saved = window.location.hash = hashString;
-    return this.load();
-  },
-  remove: function(remove) {
+		return this.load();
+	},
+	remove: function(remove) {
 		var removes;
 		var i;
 		var key;
-    this.load();
+
+		this.load();
 
 		if (typeof remove !== 'object') {
-      removes = [remove]; // new Array(); is discouraged (Crockford / jsLint)
-      //removes[0] = remove;
-    } else {
-      removes = remove;
-	}
+			removes = [remove]; // new Array(); is discouraged (Crockford / jsLint)
+			//removes[0] = remove;
+		} else {
+			removes = remove;
+		}
 
-    // var
-    var hashString = '';
-    var sep = '#';
+		// var
+		var hashString = '';
+		var sep = '#';
 
 		for (i = 0; i < removes.length; i++) {
-      if(this.vars.current.hasOwnProperty(removes[i])) {
-        delete this.vars.current[removes[i]];
-	  }
-    }
+			if (this.vars.current.hasOwnProperty(removes[i])) {
+				delete this.vars.current[removes[i]];
+			}
+		}
 
-    // create new hash string
+		// create new hash string
 		for(key in this.vars.current) {
-      if(this.vars.current.hasOwnProperty(key)) {
-          hashString += sep+this.encode(key)+'='+this.encode(this.vars.current[key]);
-        sep = '&';
-      }
-    }
+			if (this.vars.current.hasOwnProperty(key)) {
+				hashString += sep+this.encode(key)+'='+this.encode(this.vars.current[key]);
+				sep = '&';
+			}
+		}
 		this.vars.last_hash_saved = window.location.hash = hashString;
 
 		this.load();
 		// a bit odd: this one returns the OLD set, while set() returns the UPDATED set...
-    return this.vars.current;
-  },
+		return this.vars.current;
+	},
 	setChangedVars: function() {
 		var change_count;
 		var key;
@@ -200,10 +200,10 @@ var jsGET = {
 						change_count--;         // faster?/simpler than multiple 'else' branches just to track change_count
 						delete this.vars.changed[key];
 					}
-          delete oldVars[key];
-        }
+					delete oldVars[key];
+				}
 				change_count++;
-	  }
+			}
 		}
 		// merge the rest of this.vars.old with the changedVars
 		for (key in oldVars) {
@@ -221,7 +221,7 @@ var jsGET = {
 		this.vars.foreign_hash_change = false;
 		this.vars.old = Object.clone(this.vars.current);
 
-    this.pollHash = function() {
+		this.pollHash = function() {
 			var key;
 
 			this.load();    // side effect: an immediate check (one more) to see whether the hash has changed by us or others
@@ -230,12 +230,12 @@ var jsGET = {
 				this.setChangedVars();
 				if (callAlways || this.vars.foreign_hash_change) {
 					// var
-            /*
-            if (typeof console !== 'undefined' && console.log) console.log('-----');
-            if (typeof console !== 'undefined' && console.log) console.log(self.vars.old);
-            if (typeof console !== 'undefined' && console.log) console.log(self.vars.changed);
-            */
-            // call the given listener function
+					/*
+					if (typeof console !== 'undefined' && console.log) console.log('-----');
+					if (typeof console !== 'undefined' && console.log) console.log(this.vars.old);
+					if (typeof console !== 'undefined' && console.log) console.log(this.vars.changed);
+					*/
+					// call the given listener function
 					if (typeof listener === 'function') {
 						listener.apply(bind, [this.vars]);
 					}
@@ -247,28 +247,28 @@ var jsGET = {
 					this.vars.hash_changed = false;
 					this.vars.foreign_hash_change = false;
 
-          /*
-          if (typeof console !== 'undefined' && console.log) console.log('-----');
-          if (typeof console !== 'undefined' && console.log) console.log(self.vars.current);
-          if (typeof console !== 'undefined' && console.log) console.log(self.vars.old);
-          if (typeof console !== 'undefined' && console.log) console.log(self.vars.changed);
-          */
+					/*
+					if (typeof console !== 'undefined' && console.log) console.log('-----');
+					if (typeof console !== 'undefined' && console.log) console.log(this.vars.current);
+					if (typeof console !== 'undefined' && console.log) console.log(this.vars.old);
+					if (typeof console !== 'undefined' && console.log) console.log(this.vars.changed);
+					*/
 					this.vars.old = new this.vars.current.constructor();
 					for (key in this.vars.current) {
 						if (this.vars.current.hasOwnProperty(key)) {
 							this.vars.old[key] = this.vars.current[key];
-		  }
-        }
-    }
+						}
+					}
+				}
 			}
 		};
 
 		return setInterval(this.pollHash.bind(this), 500);
-  },
-  removeListener: function(listenerID) { // use the interval ID returned by addListener
-    delete this.pollHash;
-    return clearInterval(listenerID);
-  }
+	},
+	removeListener: function(listenerID) { // use the interval ID returned by addListener
+		delete this.pollHash;
+		return clearInterval(listenerID);
+	}
 };
 
 
