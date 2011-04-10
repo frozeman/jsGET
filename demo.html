@@ -48,6 +48,15 @@
   <a href="#" onclick="jsGET.set({'myNavi':'lastpage','newVar':'newValue'});return false;">Last page</a><br /><br />
   <a href="#" onclick="jsGET.remove('myNavi');return false;">Remove "myNavi" var</a><br />
   <a href="#" onclick="jsGET.clear();return false;">Clear all</a><br />
+  <h2>Mode</h2>
+  <a href="?mode=regular">Fire jsGET listener (and update output box below) with every change</a><br />
+  <a href="?mode=only-browser-history">Fire jsGET listener (and update output box below) ONLY when you change the URL by going back in the browser history (or by manually editing the hash section)</a><br />
+  Listener test frequency:<br />
+  <a href="?freq=100">very fast (0.1s)</a> |
+  <a href="?freq=250">fast (0.25s)</a> |
+  <a href="?freq=500">regular/default (0.5s)</a> |
+  <a href="?freq=1000">slow (1s)</a> |
+  <a href="?freq=5000">very slow (5s)</a><br />
   </div>
   <br />
   <div id="output">
@@ -56,8 +65,8 @@
   <script type="text/javascript">
 
   // run the putInOutpuBox always when the hash value changes
-  // (when the second parameter is FALSE, it only calls the function, when the browser history button (back, forward) is clicked)
-  var newListener = jsGET.addListener(putInOutputBox,true); // the "newListener" var get the setIntervallId necessary for removeListener()
+  // (when the second parameter is FALSE, it only calls the function when the browser history button (back, forward) is clicked)
+  var newListener = jsGET.addListener(putInOutputBox, (get_uri_arg('mode') !== 'only-browser-history'), null, parseInt(get_uri_arg('freq'))); // the "newListener" var get the setIntervallId necessary for removeListener()
   
   // the function which get called by the listener
   function putInOutputBox(hashVars) {
@@ -86,7 +95,26 @@
     output += '<br /><br /><b>This uses the get() method, to fetch the "myNavi" var:</b><br />'+jsGET.get('myNavi');
     
     outputBox.innerHTML = output;
+	blink(1);
+	setTimeout(blink, 250);
   }
+  
+  function blink(toggle) {
+    var outputBox = document.getElementById("output");
+	outputBox.style.backgroundColor = (toggle == 1 ? '#800' : '');
+  }
+	
+	// derived from  http://www.netlobo.com/url_query_string_javascript.html
+	function get_uri_arg(name)
+	{
+	  var re = '[?&]' + name + '=([^&#]*)';
+	  var regex = new RegExp(re);
+	  var results = regex.exec(window.location.href);
+	  if (results == null)
+		return '';
+	  else
+		return results[1];
+	}  
   </script>
 </body>
 </html>
