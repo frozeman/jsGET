@@ -39,6 +39,22 @@
   }
   </style>
   
+
+</head>
+<body>
+  
+  <div id="menu">
+  <h1>Navigation</h1>
+  <a href="#" onclick="jsGET.set('myNavi=firstpage');return false;">First page</a><br />
+  <a href="#" onclick="jsGET.set({'myNavi':'secondpage'});return false;">Second page</a><br />
+  <a href="#" onclick="jsGET.set({'myNavi':'lastpage','newVar':'newValue'});return false;">Last page</a><br /><br />
+  <a href="#" onclick="jsGET.remove('myNavi');return false;">Remove "myNavi" var</a><br />
+  <a href="#" onclick="jsGET.clear();return false;">Clear all</a><br />
+  </div>
+  <br />
+  <div id="output">
+  </div>
+  
   <script type="text/javascript">
 
   // run the putInOutpuBox always when the hash value changes
@@ -74,21 +90,5 @@
     outputBox.innerHTML = output;
   }
   </script>
-
-</head>
-<body>
-  
-  <div id="menu">
-  <h1>Navigation</h1>
-  <a href="#" onclick="jsGET.set('myNavi=firstpage');return false;">First page</a><br />
-  <a href="#" onclick="jsGET.set({'myNavi':'secondpage'});return false;">Second page</a><br />
-  <a href="#" onclick="jsGET.set({'myNavi':'lastpage','newVar':'newValue'});return false;">Last page</a><br /><br />
-  <a href="#" onclick="jsGET.remove('myNavi');return false;">Remove "myNavi" var</a><br />
-  <a href="#" onclick="jsGET.clear();return false;">Clear all</a><br />
-  </div>
-  <br />
-  <div id="output">
-  </div>
-  
 </body>
 </html>
