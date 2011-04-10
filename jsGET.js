@@ -225,6 +225,9 @@ var jsGET = {
 
 			this.load();    // side effect: an immediate check (one more) to see whether the hash has changed by us or others
 
+			// and make sure listener always fires whn callAlways==FALSE and user is going back&forth in the browser history (one or more history entries may match   this.vars.last_hash_saved !)
+			this.vars.last_hash_saved = window.location.hash;
+
 			if (this.vars.hash_changed) {
 				this.setChangedVars();
 				if (callAlways || this.vars.foreign_hash_change) {
