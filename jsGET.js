@@ -214,7 +214,7 @@ var jsGET = {
 		}
 		this.vars.change_count = change_count;
 	},
-	addListener: function(listener,callAlways,bind) { // use the returned interval ID for removeListener
+	addListener: function(listener, callAlways, bind) { // use the returned interval ID for removeListener
 
 		this.load();
 		this.vars.hash_changed = false;
