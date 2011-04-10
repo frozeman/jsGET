@@ -186,91 +186,70 @@ var jsGET = {
 	},
 	setChangedVars: function() {
 		var change_count;
-		var key;
-		var oldVars = Object.clone(this.vars.old);
-
-		this.vars.changed = Object.clone(this.vars.current);
-
-		// check for changed vars
-		change_count = 0;
-		for (key in this.vars.changed) {
-			if (this.vars.changed.hasOwnProperty(key)) {
-				if (oldVars.hasOwnProperty(key)) {
-					if (oldVars[key] === this.vars.changed[key]) {
-						change_count--;         // faster?/simpler than multiple 'else' branches just to track change_count
-						delete this.vars.changed[key];
-					}
-					delete oldVars[key];
-				}
-				change_count++;
-			}
+      var oldVars = new self.vars.old.constructor();
+	  for(var key in self.vars.old) {
+		oldVars[key] = self.vars.old[key];
+	  }
+      self.vars.changed = new self.vars.current.constructor();
+	  for(var key in self.vars.current) {
+		self.vars.changed[key] = self.vars.current[key];
+	  }
+      // check for changed vars
+	  change_count = 0;
+      for(var key in self.vars.changed) {
+        if(self.vars.changed.hasOwnProperty(key) && typeof oldVars[key] != 'undefined' && oldVars[key] == self.vars.changed[key]) {
+          delete self.vars.changed[key];
+          delete oldVars[key];
+        }
+	    else {
+		  change_count++;
 		}
-		// merge the rest of this.vars.old with the changedVars
-		for (key in oldVars) {
-			if (oldVars.hasOwnProperty(key) /* && !this.vars.changed.hasOwnProperty(key) */ ) {
-				this.vars.changed[key] = oldVars[key];
-				change_count++;
-			}
+	  }
+      // merge the rest of self.vars.old with the changedVars
+      for(var key in oldVars) {
+        if(oldVars.hasOwnProperty(key) && !(key in self.vars.changed)) {
+		  self.vars.changed[key] = oldVars[key];
+		  change_count++;
 		}
-		this.vars.change_count = change_count;
-	},
-	addListener: function(listener, callAlways, bind) { // use the returned interval ID for removeListener
+      }
+	  return self.vars.change_count = change_count;
+    }
 
-		this.load();
-		this.vars.hash_changed = false;
-		this.vars.foreign_hash_change = false;
-		this.vars.old = Object.clone(this.vars.current);
+    this.pollHash = function() {
+        if(lastHash !== window.location.hash) {
+          // var
+          lastHash = window.location.hash;
 
-		this.pollHash = function() {
-			var key;
-
-			this.load();    // side effect: an immediate check (one more) to see whether the hash has changed by us or others
-
-			if (this.vars.hash_changed) {
-				this.setChangedVars();
-				if (callAlways || this.vars.foreign_hash_change) {
-					// var
-					/*
-					if (typeof console !== 'undefined' && console.log) console.log('-----');
-					if (typeof console !== 'undefined' && console.log) console.log(this.vars.old);
-					if (typeof console !== 'undefined' && console.log) console.log(this.vars.changed);
-					*/
-					// call the given listener function
-					if (typeof listener === 'function') {
-						listener.apply(bind, [this.vars]);
-					}
-
-					// only reset the 'old' array, i.e. effect the '.changed' set, when the listener was actually (to be) invoked.
-					//
-					// also reset the 'changed' markers so changes applied inside the listener don't 'recursively' trigger the listener:
-					this.load();
-					this.vars.hash_changed = false;
-					this.vars.foreign_hash_change = false;
-
-					/*
-					if (typeof console !== 'undefined' && console.log) console.log('-----');
-					if (typeof console !== 'undefined' && console.log) console.log(this.vars.current);
-					if (typeof console !== 'undefined' && console.log) console.log(this.vars.old);
-					if (typeof console !== 'undefined' && console.log) console.log(this.vars.changed);
-					*/
-					this.vars.old = new this.vars.current.constructor();
-					for (key in this.vars.current) {
-						if (this.vars.current.hasOwnProperty(key)) {
-							this.vars.old[key] = this.vars.current[key];
-						}
-					}
-				}
+          self.load();
+          var change_count = setChangedVars();
+          if(callAlways || change_count > 0) {
+            // var
+            /*
+            if (typeof console !== 'undefined' && console.log) console.log('-----');
+            if (typeof console !== 'undefined' && console.log) console.log(self.vars.old);
+            if (typeof console !== 'undefined' && console.log) console.log(self.vars.changed);
+            */
+            // call the given listener function
+            if(typeof listener == 'function') {
+				listener.apply(bind,[self.vars]);
 			}
-		};
-
-		return setInterval(this.pollHash.bind(this), 500);
-	},
-	removeListener: function(listenerID) { // use the interval ID returned by addListener
-		delete this.pollHash;
-		return clearInterval(listenerID);
-	}
-};
-
-
-/* settings for jsLint: undef: true, browser: true, indent: 4 */
-
+          }
+          /*
+          if (typeof console !== 'undefined' && console.log) console.log('-----');
+          if (typeof console !== 'undefined' && console.log) console.log(self.vars.current);
+          if (typeof console !== 'undefined' && console.log) console.log(self.vars.old);
+          if (typeof console !== 'undefined' && console.log) console.log(self.vars.changed);
+          */
+          self.vars.old = new self.vars.current.constructor();
+		  for(var key in self.vars.current) {
+			self.vars.old[key] = self.vars.current[key];
+		  }
+        }
+    }
+    return setInterval(this.pollHash, 500);
+  },
+  removeListener: function(listenerID) { // use the interval ID returned by addListener
+    delete this.pollHash;
+    return clearInterval(listenerID);
+  }
+}
