@@ -213,7 +213,7 @@ var jsGET = {
 		}
 		this.vars.change_count = change_count;
 	},
-	addListener: function(listener, callAlways, bind) { // use the returned interval ID for removeListener
+	addListener: function(listener, callAlways, bind, freq) { // use the returned interval ID for removeListener
 
 		this.load();
 		this.vars.hash_changed = false;
@@ -265,7 +265,7 @@ var jsGET = {
 		var self = this;
 		return setInterval(function() {
 			self.pollHash();
-		}, 500);
+		}, (freq || 500));
 	},
 	removeListener: function(listenerID) { // use the interval ID returned by addListener
 		delete this.pollHash;
