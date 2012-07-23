@@ -8,7 +8,7 @@
 *
 * @author Fabian Vogelsteller <fabian@feindura.org>
 * @copyright Fabian Vogelsteller
-* @license http://www.gnu.org/licenses GNU General Public License version 3
+* @license MIT-License
 *
 * @version 0.2
 *
